@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>test</title>
+        <style type="text/css">
+        .errdiagnose {
+            margin-bottom: 5px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .errdiagnose_title {
+            background: none repeat scroll 0 0 #E4E4E4;
+            border: 1px solid #CACACA;
+            color: #575757;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            margin-bottom: 1px;
+            padding: 5px;
+        }
+
+        .errdiagnose_content {
+            background-color: #444444;
+            color: #6CF33F;
+            margin: 2px 0;
+            overflow-x: auto;
+            padding: 5px;
+        }
+
+    </style>
+    <link type="text/css" href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/static/css-sprite/sprite-av-black.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script>
+
+    </script>
+</head>
+<body>
+{% if output %}
+  <span class="span14">{{ output }}</span>
+{% else %}
+  <h1>Hello World!</h1>
+{% endif %}
+
+<!--
+<div>
+    <div class="icon icon-ic_play_circle_outline_black_24dp"></div>
+</div>
+-->
+
+
+</body>
+</html>
