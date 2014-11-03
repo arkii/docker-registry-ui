@@ -25,7 +25,6 @@ curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
 
 
 
-import json
 import tarfile
 import re
 import os
@@ -33,49 +32,92 @@ from datetime import datetime
 
 #from urllib2.parse import urlencode
 
-from httplib import HTTPConnection
-
-HTTP_HEADER = {
-    "Cache-Control": "no-cache",
-    "User-Agent": "DockerRegistryUI",
-    "Content-type": "application/x-www-form-urlencoded",
-    "Accept": "text/plain"
-}
-
 server = '10.15.184.241'
 target = '/v1/_ping'
-def registry_conn(ipaddr, uri):
-    _uri = uri
-    #_params = urlencode({'username': 'lb_fresh', 'password': 'ct557k3O6', 'url': _url, 'type': 1})
-    _conn = HTTPConnection(ipaddr)
-    # _conn.request('POST', '/cdnUrlPush.do', _params, headers=HTTP_HEADER)
-    _conn.request('GET', url=_uri)
-    _response = _conn.getresponse()
-    _data = _response.read()
-    #_header = _data.headers
-    #_code = _data.status
-    return _data
+
+
+
+from httplib import HTTPConnection
+
+class RegistryClass:
+    def __init__(self):
+        self.http_header = {
+            "Cache-Control": "no-cache",
+            "User-Agent": "DockerRegistryUI",
+            "Content-type": "application/x-www-form-urlencoded",
+            "Accept": "text/plain"
+        }
+
+        #self.server = '10.15.184.241'
+        #self.target = '/v1/_ping'
+
+    def conn(self, IP):
+        self.conn = HTTPConnection(IP)
+        return self.conn
+
+    def get(self, uri=None):
+        self.action = 'GET'
+        self.conn.request(method=self.action, url=uri, headers=self.http_header)
+        self.response = self.conn.getresponse()
+        self.data = self.response.read()
+        #self.header = self.response.headers
+        #self.status = self.response.status
+        return self.data
+
+    def close(self):
+        self.conn.close()
+
+    # def registry_act(self):
+
+
+registry = RegistryClass()
+registry.conn(server)
+
+
 
 from flask import Flask
+from flask import request
+from flask import json
 from flask import render_template as render
 
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/plain', methods=['GET', 'POST'])
 def hello_world():
-    return 'Hello World !'
+    if request.method == 'POST':
+        return 'YOU POST ME !'
+    else:
+        return 'YOU GET ME !'
+
+
+
+@app.route('/')
+def main_page():
+    allimage = registry.get('/v1/search?q=')
+    msg = json.JSONDecoder(allimage).decode
+    return render('index.html', msg=msg)
 
 @app.route('/ping')
-def test(output=None):
-    bb = registry_conn(server, '/v1/_ping')
-    return render('test.html', output=bb)
+def test():
+    bb = registry.get('/v1/_ping')
+    return render('index.html', msg=bb)
 
-@app.route('/search')
-def search(output=None):
-    bb = registry_conn(server, '/v1/search?q=arkii')
-    return render('test.html', output=bb)
+@app.route('/search/', methods=['POST'])
+@app.route('/search/<imagename>')
+def search_image(imagename=None):
+    def go_search(n=None):
+        l = registry.get('/v1/search?q=' + str(n))
+        return l
 
+    if request.method == 'POST':
+        _content = go_search(n=request.values['imagename'])
+
+    if imagename:
+        _content = go_search(n=imagename)
+    return render('index.html', msg=_content)
+
+#registry.close()
 
 if __name__ == '__main__':
     Flask.debug = True

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>test</title>
+    <style type="text/css">
+        .errdiagnose {
+            margin-bottom: 5px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .errdiagnose_title {
+            background: none repeat scroll 0 0 #E4E4E4;
+            border: 1px solid #CACACA;
+            color: #575757;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            margin-bottom: 1px;
+            padding: 5px;
+        }
+
+        .errdiagnose_content {
+            background-color: #444444;
+            color: #6CF33F;
+            margin: 2px 0;
+            overflow-x: auto;
+            padding: 5px;
+        }
+
+    </style>
+    <link type="text/css" href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/static/css-sprite/sprite-av-black.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script>
+
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="/">docker-registry-ui</a>
+            <ul class="nav">
+                <li class="active"><a href="/"><i class="icon-home"></i> Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+            <ul class="nav pull-right">
+                <form class="navbar-search pull-left" action="/search/" method="post">
+                    <input type="text" name="imagename" class="search-query" placeholder="Search images">
+                </form>
+                {#                <li><a href="/test/conf" class="my-tooltip" rel="tooltip" data-placement="bottom"#}
+                {#                       data-original-title="configtest"><i class="icon-ok icon-white"></i></a></li>#}
+                {#                <li><a href="/test/restart" class="my-tooltip" rel="tooltip" data-placement="bottom"#}
+                {#                       data-original-title="restart"><i class="icon-off icon-white"></i></a></li>#}
+            </ul>
+        </div>
+    </div>
