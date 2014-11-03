@@ -51,17 +51,19 @@ class RegistryClass:
         #self.server = '10.15.184.241'
         #self.target = '/v1/_ping'
 
-    def conn(self, IP):
-        self.conn = HTTPConnection(IP)
-        return self.conn
+    # def conn(self, IP):
+    #     self.conn = HTTPConnection(IP)
+    #     return self.conn
 
-    def get(self, uri=None):
+    def get(self, IP=None, uri=None):
+        self.conn = HTTPConnection(IP)
         self.action = 'GET'
         self.conn.request(method=self.action, url=uri, headers=self.http_header)
         self.response = self.conn.getresponse()
         self.data = self.response.read()
         #self.header = self.response.headers
         #self.status = self.response.status
+        self.conn.close()
         return self.data
 
     def close(self):
@@ -71,7 +73,7 @@ class RegistryClass:
 
 
 registry = RegistryClass()
-registry.conn(server)
+# registry.conn(server)
 
 
 
@@ -94,20 +96,20 @@ def hello_world():
 
 @app.route('/')
 def main_page():
-    allimage = registry.get('/v1/search?q=')
+    allimage = registry.get(server, '/v1/search?q=')
     msg = json.JSONDecoder(allimage).decode
     return render('index.html', msg=msg)
 
 @app.route('/ping')
 def test():
-    bb = registry.get('/v1/_ping')
+    bb = registry.get(server, '/v1/_ping')
     return render('index.html', msg=bb)
 
 @app.route('/search/', methods=['POST'])
 @app.route('/search/<imagename>')
 def search_image(imagename=None):
     def go_search(n=None):
-        l = registry.get('/v1/search?q=' + str(n))
+        l = registry.get(server, '/v1/search?q=' + str(n))
         return l
 
     if request.method == 'POST':
