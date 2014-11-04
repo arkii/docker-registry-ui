@@ -3,7 +3,6 @@ __author__ = 'arkii'
 __email__ = 'sun.qingyun@zol.com.cn'
 __create__ = '10/30/14 19:48'
 
-
 '''
 https://docs.docker.com/reference/api/registry_api/
 
@@ -24,10 +23,7 @@ curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
 '''
 
 
-
-import tarfile
-import re
-import os
+import os, re, tarfile
 from datetime import datetime
 
 #from urllib2.parse import urlencode
@@ -35,9 +31,13 @@ from datetime import datetime
 server = '10.15.184.241'
 target = '/v1/_ping'
 
-
-
 from httplib import HTTPConnection
+
+from flask import Flask
+from flask import request
+from flask import json
+from flask import render_template as render
+
 
 class RegistryClass:
     def __init__(self):
@@ -47,23 +47,25 @@ class RegistryClass:
             "Content-type": "application/x-www-form-urlencoded",
             "Accept": "text/plain"
         }
-
-        #self.server = '10.15.184.241'
-        #self.target = '/v1/_ping'
-
-    # def conn(self, IP):
-    #     self.conn = HTTPConnection(IP)
-    #     return self.conn
+        self.jsonde = json.JSONDecoder()
+        self.jsonen = json.JSONEncoder()
 
     def get(self, IP=None, uri=None):
-        self.conn = HTTPConnection(IP)
-        self.action = 'GET'
-        self.conn.request(method=self.action, url=uri, headers=self.http_header)
-        self.response = self.conn.getresponse()
-        self.data = self.response.read()
-        #self.header = self.response.headers
-        #self.status = self.response.status
-        self.conn.close()
+        try:
+            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.action = 'GET'
+            self.conn.request(method=self.action, url=uri, headers=self.http_header)
+            self.response = self.conn.getresponse()
+            #self.response.status
+            #self.response.reason
+            #self.response.msg
+            self.content = self.response.read() #here is str type
+            self.data = self.jsonde.decode(self.content) #convert str to dict
+            self.headers = dict(self.response.getheaders()) #convert list to dict
+            self.data['server_headers'] = self.headers
+
+        finally:
+            self.conn.close()
         return self.data
 
     def close(self):
@@ -73,14 +75,7 @@ class RegistryClass:
 
 
 registry = RegistryClass()
-# registry.conn(server)
 
-
-
-from flask import Flask
-from flask import request
-from flask import json
-from flask import render_template as render
 
 app = Flask(__name__)
 
@@ -97,8 +92,7 @@ def hello_world():
 @app.route('/')
 def main_page():
     allimage = registry.get(server, '/v1/search?q=')
-    msg = json.JSONDecoder(allimage).decode
-    return render('index.html', msg=msg)
+    return render('index.html', msg=allimage)
 
 @app.route('/ping')
 def test():
@@ -119,7 +113,16 @@ def search_image(imagename=None):
         _content = go_search(n=imagename)
     return render('index.html', msg=_content)
 
-#registry.close()
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     Flask.debug = True
