@@ -50,20 +50,57 @@ class RegistryClass:
         self.jsonde = json.JSONDecoder()
         self.jsonen = json.JSONEncoder()
 
-    def get(self, IP=None, uri=None):
+    def ping(self, IP=None, verbose=False):
+        try:
+            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.conn.request(method='GET', url='/v1/_ping', headers=self.http_header)
+            self.response = self.conn.getresponse()
+            self.data = self.response.read()
+            if verbose is True:
+                self.data = {'Callback' : self.data}
+                self.status = self.response.status
+                self.message = self.response.reason
+                self.headers = dict(self.response.getheaders())
+                self.data['server_headers'] = self.headers
+                self.data['server_message'] = self.message
+                self.data['server_code'] = self.status
+        finally:
+            self.conn.close()
+        return self.data
+
+    def get(self, IP=None, uri=None, verbose=False):
         try:
             self.conn = HTTPConnection(IP, port=80, timeout=3)
             self.action = 'GET'
             self.conn.request(method=self.action, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
-            #self.response.status
-            #self.response.reason
-            #self.response.msg
             self.content = self.response.read() #here is str type
             self.data = self.jsonde.decode(self.content) #convert str to dict
-            self.headers = dict(self.response.getheaders()) #convert list to dict
-            self.data['server_headers'] = self.headers
+            if verbose is True:
+                self.status = self.response.status
+                self.message = self.response.reason
+                self.headers = dict(self.response.getheaders())
+                self.data['server_headers'] = self.headers
+                self.data['server_message'] = self.message
+                self.data['server_code'] = self.status
+        finally:
+            self.conn.close()
+        return self.data
 
+    def act(self, action='GET', IP=None, uri=None, verbose=False):
+        try:
+            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.conn.request(method=action, url=uri, headers=self.http_header)
+            self.response = self.conn.getresponse()
+            self.content = self.response.read() #here is str type
+            self.data = self.jsonde.decode(self.content) #convert str to dict
+            if verbose is True:
+                self.status = self.response.status
+                self.message = self.response.reason
+                self.headers = dict(self.response.getheaders())
+                self.data['server_headers'] = self.headers
+                self.data['server_message'] = self.message
+                self.data['server_code'] = self.status
         finally:
             self.conn.close()
         return self.data
@@ -71,7 +108,7 @@ class RegistryClass:
     def close(self):
         self.conn.close()
 
-    # def registry_act(self):
+# def data2table(input):
 
 
 registry = RegistryClass()
@@ -79,41 +116,61 @@ registry = RegistryClass()
 
 app = Flask(__name__)
 
-
-@app.route('/plain', methods=['GET', 'POST'])
-def hello_world():
-    if request.method == 'POST':
-        return 'YOU POST ME !'
-    else:
-        return 'YOU GET ME !'
-
-
-
 @app.route('/')
 def main_page():
-    allimage = registry.get(server, '/v1/search?q=')
-    return render('index.html', msg=allimage)
+    all = registry.get(server, '/v1/search?q=')
+    # return render('index.html', msg=alli)
+    return render('test.html', msg=all)
+
 
 @app.route('/ping')
-def test():
-    bb = registry.get(server, '/v1/_ping')
-    return render('index.html', msg=bb)
+def ping():
+    bb = registry.ping(server, verbose=True)
+    return str(bb)
 
-@app.route('/search/', methods=['POST'])
-@app.route('/search/<imagename>')
-def search_image(imagename=None):
+
+@app.route('/find/', methods=['POST'])
+@app.route('/find/<text>')
+def find_image(text=None):
     def go_search(n=None):
         l = registry.get(server, '/v1/search?q=' + str(n))
         return l
 
     if request.method == 'POST':
-        _content = go_search(n=request.values['imagename'])
+        msg = go_search(n=request.values['name'])
 
-    if imagename:
-        _content = go_search(n=imagename)
-    return render('index.html', msg=_content)
+    if text:
+        msg = go_search(n=text)
+
+    return render('index.html', msg=msg)
+
+@app.route('/rm/', methods=['POST'])
+@app.route('/rm/<name>')
+def delete(name=None):
+    if request.method == 'POST':
+        uri = '/v1/repositories/' + str(request.values['name'])
+        msg = registry.act(server, action='DELETE' , uri=uri)
+    if name:
+        uri = '/v1/repositories/' + str(name)
+        msg = registry.act(server, action='DELETE' , uri=uri)
+    # return render('index.html', msg=msg)
+    return str(msg)
 
 
+
+
+@app.route('/plain', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def hello_world():
+    if request.method == 'GET':
+        return 'YOU GET ME !'
+    if request.method == 'POST':
+        return 'YOU POST ME !'
+    if request.method == 'PUT':
+        return 'YOU PUT ME !'
+    if request.method == 'DELETE':
+        return 'YOU DELETE ME !'
+    else:
+        return 'YOU DID NOTHING !'
 
 
 
