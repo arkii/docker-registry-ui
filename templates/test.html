@@ -37,10 +37,12 @@
 {#</ul>#}
 
 <dl>
-{% for key, value in msg.iteritems() %}
-    <dt>{{ key|e }}</dt>
-    <dd>{{ value|e }}</dd>
-{% endfor %}
+{#{% for key, value in msg.iteritems() %}#}
+{#    <dt>{{ key|e }}</dt>#}
+{#    <dd>{{ value|e }}</dd>#}
+{#{% endfor %}#}
+
+    {{ msg|extract }}
 </dl>
 
 

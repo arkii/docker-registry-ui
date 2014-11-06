@@ -36,6 +36,7 @@ from httplib import HTTPConnection
 from flask import Flask
 from flask import request
 from flask import json
+#from jinja2 import Environment
 from flask import render_template as render
 
 
@@ -57,7 +58,7 @@ class RegistryClass:
             self.response = self.conn.getresponse()
             self.data = self.response.read()
             if verbose is True:
-                self.data = {'Callback' : self.data}
+                self.data = {'result' : self.data}
                 self.status = self.response.status
                 self.message = self.response.reason
                 self.headers = dict(self.response.getheaders())
@@ -87,14 +88,17 @@ class RegistryClass:
             self.conn.close()
         return self.data
 
-    def act(self, action='GET', IP=None, uri=None, verbose=False):
+    def act(self, IP=None, action='GET', uri=None, verbose=False):
         try:
             self.conn = HTTPConnection(IP, port=80, timeout=3)
-            self.conn.request(method=action, url=uri, headers=self.http_header)
+            self.method = action
+            self.conn.request(method=self.method, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
             self.content = self.response.read() #here is str type
-            self.data = self.jsonde.decode(self.content) #convert str to dict
+            #self.data = self.jsonde.decode(self.content) #convert str to dict
+            self.data = self.response.read()
             if verbose is True:
+                self.data = {'Callback' : self.data}
                 self.status = self.response.status
                 self.message = self.response.reason
                 self.headers = dict(self.response.getheaders())
@@ -111,6 +115,22 @@ class RegistryClass:
 # def data2table(input):
 
 
+def extract(d):
+    if d.has_key('result') : print 'result', ' -is:- ', d['result']
+    if d.has_key('query') : print 'query', ' -is:- ', d['query']
+    if d.has_key('num_results') : print 'num_results', ' -is:- ', d['num_results']
+    if d.has_key('server_headers') : print 'server_headers', ' -is:- ', d['server_headers']
+    if d.has_key('server_message') : print 'server_message', ' -is:- ', d['server_message']
+    if d.has_key('server_code') : print 'server_code', ' -is:- ', d['server_code']
+    if d.has_key('results'):
+        for i in d['results']:
+            for k,v in i.iteritems():
+                print k, ' -is:- ', v
+
+
+#from jinja2 import environment
+#environment.filter['extract'] = extract
+
 registry = RegistryClass()
 
 
@@ -118,7 +138,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_page():
-    all = registry.get(server, '/v1/search?q=')
+    all = str(registry.get(server, '/v1/search?q='))
     # return render('index.html', msg=alli)
     return render('test.html', msg=all)
 
@@ -132,31 +152,36 @@ def ping():
 @app.route('/find/', methods=['POST'])
 @app.route('/find/<text>')
 def find_image(text=None):
-    def go_search(n=None):
-        l = registry.get(server, '/v1/search?q=' + str(n))
-        return l
-
     if request.method == 'POST':
-        msg = go_search(n=request.values['name'])
-
+        uri = '/v1/search?q=' + request.values['name']
     if text:
-        msg = go_search(n=text)
-
+        uri = '/v1/search?q=' + str(text)
+    msg = registry.get(server, uri=uri)
     return render('index.html', msg=msg)
 
-@app.route('/rm/', methods=['POST'])
+
+@app.route('/tags/', methods=['POST'])
+@app.route('/tags/<name>')
+def show_tags(name=None):
+    if request.method == 'POST':
+        uri = '/v1/repositories/' + str(request.values['name']) + '/tags'
+    else:
+        uri = '/v1/repositories/' + str(name) + '/tags'
+    msg = registry.get(server, uri=uri, verbose=True)
+    return render('index.html', msg=msg)
+
+
+@app.route('/rm/', methods=['DELETE'])
 @app.route('/rm/<name>')
 def delete(name=None):
-    if request.method == 'POST':
+    if request.method == 'DELETE':
         uri = '/v1/repositories/' + str(request.values['name'])
-        msg = registry.act(server, action='DELETE' , uri=uri)
+        msg = registry.act(server, action='DELETE', uri=uri, verbose=True)
     if name:
         uri = '/v1/repositories/' + str(name)
-        msg = registry.act(server, action='DELETE' , uri=uri)
+        msg = registry.act(server, action='DELETE', uri=uri)
     # return render('index.html', msg=msg)
     return str(msg)
-
-
 
 
 @app.route('/plain', methods=['GET', 'POST', 'PUT', 'DELETE'])
