@@ -26,7 +26,7 @@ curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
 import os, re, tarfile
 from datetime import datetime
 
-#from urllib2.parse import urlencode
+from urllib import urlencode
 
 server = '10.15.184.241'
 target = '/v1/_ping'
@@ -36,7 +36,6 @@ from httplib import HTTPConnection
 from flask import Flask
 from flask import request
 from flask import json
-#from jinja2 import Environment
 from flask import render_template as render
 
 
@@ -77,6 +76,7 @@ class RegistryClass:
             self.response = self.conn.getresponse()
             self.content = self.response.read() #here is str type
             self.data = self.jsonde.decode(self.content) #convert str to dict
+            print self.data
             if verbose is True:
                 self.status = self.response.status
                 self.message = self.response.reason
@@ -98,7 +98,7 @@ class RegistryClass:
             #self.data = self.jsonde.decode(self.content) #convert str to dict
             self.data = self.response.read()
             if verbose is True:
-                self.data = {'Callback' : self.data}
+                self.data = {'result' : self.data}
                 self.status = self.response.status
                 self.message = self.response.reason
                 self.headers = dict(self.response.getheaders())
@@ -116,20 +116,20 @@ class RegistryClass:
 
 
 def extract(d):
-    if d.has_key('result') : print 'result', ' -is:- ', d['result']
-    if d.has_key('query') : print 'query', ' -is:- ', d['query']
-    if d.has_key('num_results') : print 'num_results', ' -is:- ', d['num_results']
-    if d.has_key('server_headers') : print 'server_headers', ' -is:- ', d['server_headers']
-    if d.has_key('server_message') : print 'server_message', ' -is:- ', d['server_message']
-    if d.has_key('server_code') : print 'server_code', ' -is:- ', d['server_code']
-    if d.has_key('results'):
-        for i in d['results']:
-            for k,v in i.iteritems():
-                print k, ' -is:- ', v
+    if isinstance(d, dict):
+        if d.has_key('result') : print 'result', ' -is:- ', d['result']
+        if d.has_key('query') : print 'query', ' -is:- ', d['query']
+        if d.has_key('num_results') : print 'num_results', ' -is:- ', d['num_results']
+        if d.has_key('server_headers') : print 'server_headers', ' -is:- ', d['server_headers']
+        if d.has_key('server_message') : print 'server_message', ' -is:- ', d['server_message']
+        if d.has_key('server_code') : print 'server_code', ' -is:- ', d['server_code']
+        if d.has_key('results'):
+            for i in d['results']:
+                for k,v in i.iteritems():
+                    print k, ' -is:- ', v
+    else:
+        print 'aaa'
 
-
-#from jinja2 import environment
-#environment.filter['extract'] = extract
 
 registry = RegistryClass()
 
@@ -138,8 +138,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_page():
-    all = str(registry.get(server, '/v1/search?q='))
-    # return render('index.html', msg=alli)
+    all = registry.get(server, '/v1/search?q=', verbose=True)
+    # return render('test.html', msg=all, extract=lambda d: extract(d))
     return render('test.html', msg=all)
 
 
@@ -156,7 +156,7 @@ def find_image(text=None):
         uri = '/v1/search?q=' + request.values['name']
     if text:
         uri = '/v1/search?q=' + str(text)
-    msg = registry.get(server, uri=uri)
+    msg = registry.get(server, uri=uri, verbose=True)
     return render('index.html', msg=msg)
 
 

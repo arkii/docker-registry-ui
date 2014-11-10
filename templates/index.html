@@ -3,14 +3,23 @@
 <!--    <h1>Docker Registry UI</h1>
     <hr>
 -->
-    <div>
-        <div>
-            {% if msg %}
-                <span class="span10">{{ msg }}</span>
-            {% else %}
-                <h1>Hello World!</h1>
-            {% endif %}
-        </div>
-    </div>
+<div>
+    <table class="table table-striped table-hover table-condensed">
+        <tr>
+            <th>Description</th>
+            <th>Name</th>
+        </tr>
+        {% for i in msg['results'] %}
+            <tr>
+                {% for v in i.values() %}
+                    <td>{{ v }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
 
+    <span class="errdiagnose_title">{{ msg['server_headers'] }} </span>
+    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>
+</div>
+{{ msg }}
 {% include 'footer.html' %}

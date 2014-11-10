@@ -36,6 +36,10 @@
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
     <script>
 
+        jQuery('#myTab a').click(function (e) {
+            e.preventDefault();
+            jQuery(this).tab('show');
+        })
     </script>
 </head>
 <body>
@@ -46,7 +50,7 @@
             <ul class="nav">
                 <li class="active"><a href="/"><i class="icon-home"></i> Home</a></li>
                 <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="/ping">ping</a></li>
             </ul>
             <ul class="nav pull-right">
                 <form class="navbar-search pull-left" action="/find/" method="post">
