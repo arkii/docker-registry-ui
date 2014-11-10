@@ -8,13 +8,13 @@
         </tr>
         {% for i in msg['results'] %}
             <tr>
-                <td title="{{ i['description'] }}"><a href="/info/{{ i['name'] }}">{{ i['name'] }}</a></td>
+                <td title="{{ i['description'] }}"><a href="/tags/{{ i['name'] }}">{{ i['name'] }}</a></td>
             </tr>
         {% endfor %}
     </table>
     </table>
-    <span class="errdiagnose_title">{{ msg['server_headers'] }} </span>
-    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>
+{#    <span class="errdiagnose_title">{{ msg['server_headers'] }} </span>#}
+{#    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>#}
 </div>
 <div>{{ msg }}</div>
 

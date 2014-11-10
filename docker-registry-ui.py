@@ -25,7 +25,6 @@ curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
 
 import os, re, tarfile
 from datetime import datetime
-
 from urllib import urlencode
 
 server = '10.15.184.241'
@@ -68,6 +67,7 @@ class RegistryClass:
             self.conn.close()
         return self.data
 
+
     def get(self, IP=None, uri=None, verbose=False):
         try:
             self.conn = HTTPConnection(IP, port=80, timeout=3)
@@ -76,7 +76,6 @@ class RegistryClass:
             self.response = self.conn.getresponse()
             self.content = self.response.read() #here is str type
             self.data = self.jsonde.decode(self.content) #convert str to dict
-            print self.data
             if verbose is True:
                 self.status = self.response.status
                 self.message = self.response.reason
@@ -95,8 +94,9 @@ class RegistryClass:
             self.conn.request(method=self.method, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
             self.content = self.response.read() #here is str type
-            #self.data = self.jsonde.decode(self.content) #convert str to dict
-            self.data = self.response.read()
+            self.data = self.jsonde.decode(self.content) #convert str to dict
+            #self.data = self.content
+            print self.data
             if verbose is True:
                 self.data = {'result' : self.data}
                 self.status = self.response.status
@@ -138,9 +138,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_page():
-    all = registry.get(server, '/v1/search?q=', verbose=True)
+    msg = registry.get(server, '/v1/search?q=', verbose=True)
     # return render('test.html', msg=all, extract=lambda d: extract(d))
-    return render('test.html', msg=all)
+    msg['tableheader'] = ['Name', 'Description']
+    return render('index.html', msg=msg)
 
 
 @app.route('/ping')
@@ -157,18 +158,37 @@ def find_image(text=None):
     if text:
         uri = '/v1/search?q=' + str(text)
     msg = registry.get(server, uri=uri, verbose=True)
+    msg['tableheader'] = ['Name', 'Description']
     return render('index.html', msg=msg)
+
+
+@app.route('/info/', methods=['POST'])
+@app.route('/info/<namespace>')
+@app.route('/info/<namespace>/<repository>')
+@app.route('/info/<namespace>/<repository>/<tag>')
+def show_info(namespace=None, repository=None, tag=None):
+    if namespace is not None: _query = namespace
+    if repository is not None: _query = namespace + '/' + repository
+    if tag is not None: _query = namespace + '/' + repository + '/' + tag
+    if request.method == 'POST': uri = '/v1/images/' + str(request.values['name']) + '/json'
+    if request.method == 'GET':  uri = '/v1/images/' + _query + '/json'
+    msg = registry.act(server, uri=uri, verbose=True)
+    msg['tableheader'] = ['Tag', 'ID']
+    return render('info.html', msg=msg)
+
 
 
 @app.route('/tags/', methods=['POST'])
-@app.route('/tags/<name>')
-def show_tags(name=None):
-    if request.method == 'POST':
-        uri = '/v1/repositories/' + str(request.values['name']) + '/tags'
-    else:
-        uri = '/v1/repositories/' + str(name) + '/tags'
-    msg = registry.get(server, uri=uri, verbose=True)
-    return render('index.html', msg=msg)
+@app.route('/tags/<namespace>')
+@app.route('/tags/<namespace>/<repository>')
+def show_tags(namespace=None, repository=None):
+    if namespace is not None: _query = namespace
+    if repository is not None: _query = namespace + '/' + repository
+    if request.method == 'POST': uri = '/v1/repositories/' + str(request.values['name']) + '/tags'
+    if request.method == 'GET':  uri = '/v1/repositories/' + _query + '/tags'
+    msg = registry.act(server, uri=uri, verbose=True)
+    msg['tableheader'] = ['Tag', 'ID']
+    return render('info.html', msg=msg)
 
 
 @app.route('/rm/', methods=['DELETE'])

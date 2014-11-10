@@ -1,0 +1,19 @@
+{% include 'header.html' %}
+<div>
+    <table class="table table-striped table-hover table-condensed">
+        <tr>
+            {% for i in msg['tableheader'] %}
+                <th>{{ i }}</th>
+            {% endfor %}
+        </tr>
+        {% for k, v in msg['result'].iteritems() %}
+            <tr>
+                <td>{{ k }}</td>
+                <td><a href="/info/{{ v }}">{{ v }}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<span> {{ msg }} </span>
+
+{% include 'footer.html' %}

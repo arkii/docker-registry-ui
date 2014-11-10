@@ -6,20 +6,21 @@
 <div>
     <table class="table table-striped table-hover table-condensed">
         <tr>
-            <th>Description</th>
-            <th>Name</th>
+            {% for i in msg['tableheader'] %}
+                <th>{{ i }}</th>
+            {% endfor %}
         </tr>
         {% for i in msg['results'] %}
             <tr>
-                {% for v in i.values() %}
-                    <td>{{ v }}</td>
-                {% endfor %}
+                <td><a href="/tags/{{ i['name'] }}">{{ i['name'] }}</a></td>
+                <td>{{ i['description'] }}</td>
             </tr>
         {% endfor %}
     </table>
 
-    <span class="errdiagnose_title">{{ msg['server_headers'] }} </span>
-    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>
+    {#    <span class="errdiagnose_title">{{ msg['server_headers'] }} </span>#}
+    {#    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>#}
+
 </div>
-{{ msg }}
+<span> {{ msg }} </span>
 {% include 'footer.html' %}
