@@ -96,7 +96,6 @@ class RegistryClass:
             self.content = self.response.read() #here is str type
             self.data = self.jsonde.decode(self.content) #convert str to dict
             #self.data = self.content
-            print self.data
             if verbose is True:
                 self.data = {'result' : self.data}
                 self.status = self.response.status
@@ -112,24 +111,6 @@ class RegistryClass:
     def close(self):
         self.conn.close()
 
-# def data2table(input):
-
-
-def extract(d):
-    if isinstance(d, dict):
-        if d.has_key('result') : print 'result', ' -is:- ', d['result']
-        if d.has_key('query') : print 'query', ' -is:- ', d['query']
-        if d.has_key('num_results') : print 'num_results', ' -is:- ', d['num_results']
-        if d.has_key('server_headers') : print 'server_headers', ' -is:- ', d['server_headers']
-        if d.has_key('server_message') : print 'server_message', ' -is:- ', d['server_message']
-        if d.has_key('server_code') : print 'server_code', ' -is:- ', d['server_code']
-        if d.has_key('results'):
-            for i in d['results']:
-                for k,v in i.iteritems():
-                    print k, ' -is:- ', v
-    else:
-        print 'aaa'
-
 
 registry = RegistryClass()
 
@@ -139,7 +120,6 @@ app = Flask(__name__)
 @app.route('/')
 def main_page():
     msg = registry.get(server, '/v1/search?q=', verbose=True)
-    # return render('test.html', msg=all, extract=lambda d: extract(d))
     msg['tableheader'] = ['Name', 'Description']
     return render('index.html', msg=msg)
 
@@ -162,20 +142,33 @@ def find_image(text=None):
     return render('index.html', msg=msg)
 
 
-@app.route('/info/', methods=['POST'])
-@app.route('/info/<namespace>')
-@app.route('/info/<namespace>/<repository>')
-@app.route('/info/<namespace>/<repository>/<tag>')
-def show_info(namespace=None, repository=None, tag=None):
-    if namespace is not None: _query = namespace
-    if repository is not None: _query = namespace + '/' + repository
-    if tag is not None: _query = namespace + '/' + repository + '/' + tag
-    if request.method == 'POST': uri = '/v1/images/' + str(request.values['name']) + '/json'
-    if request.method == 'GET':  uri = '/v1/images/' + _query + '/json'
-    msg = registry.act(server, uri=uri, verbose=True)
-    msg['tableheader'] = ['Tag', 'ID']
-    return render('info.html', msg=msg)
+@app.route('/info/<id>')
+def show_info(id=None):
+    _uri = '/v1/images/' + id + '/json'
+    _msg = registry.act(server, uri=_uri, verbose=True)
+    _msg['tableheader'] = ['Tag', 'ID']
+    _uri = '/v1/images/' + id + '/ancestry'
+    _ancestry = {}
+    _ancestry['tableheader'] = 'Ancestry'
+    _ancestry['data'] = registry.act(server, uri=_uri)
+    return render('info.html', msg=_msg, ancestry=_ancestry)
 
+
+
+# @app.route('/info/', methods=['POST'])
+# @app.route('/info/<namespace>')
+# @app.route('/info/<namespace>/<repository>')
+# @app.route('/info/<namespace>/<repository>/<tag>')
+# def show_info(namespace=None, repository=None, tag=None):
+#     if namespace is not None: _query = namespace
+#     if repository is not None: _query = namespace + '/' + repository
+#     if tag is not None: _query = namespace + '/' + repository + '/' + tag
+#     if request.method == 'POST': uri = '/v1/images/' + str(request.values['name']) + '/json'
+#     if request.method == 'GET':  uri = '/v1/images/' + _query + '/json'
+#     msg = registry.act(server, uri=uri, verbose=True)
+#     ancestry = registry.act(server, uri=namespace)
+#     msg['tableheader'] = ['Tag', 'ID']
+#     return render('info.html', msg=msg)
 
 
 @app.route('/tags/', methods=['POST'])

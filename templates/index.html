@@ -4,7 +4,7 @@
     <hr>
 -->
 <div>
-    <table class="table table-striped table-hover table-condensed">
+    <table class="table table-bordered table-striped table-hover table-condensed">
         <tr>
             {% for i in msg['tableheader'] %}
                 <th>{{ i }}</th>
@@ -22,5 +22,6 @@
     {#    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>#}
 
 </div>
-<span> {{ msg }} </span>
+<span id="rawoutput"> {{ msg }} </span>
+
 {% include 'footer.html' %}
