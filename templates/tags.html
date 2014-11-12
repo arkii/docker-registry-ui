@@ -9,21 +9,9 @@
         {% for k, v in msg['result'].iteritems() %}
             <tr>
                 <td>{{ k }}</td>
-                {#                <td><a href="/info/{{ v }}">{{ v }}</a></td>#}
-                <td>{{ v }}</td>
+                <td><a href="/info/{{ v }}">{{ v }}</a></td>
             </tr>
         {% endfor %}
-        {% if ancestry %}
-            <tr>
-                <td>{{ ancestry['tableheader'] }}</td>
-                <td>
-                    {% for i in ancestry['data'] %}
-                        <a href="/info/{{ i }}">{{ i }}</a><br/>
-                    {% endfor %}
-
-                </td>
-            </tr>
-        {% endif %}
     </table>
 </div>
 <span> {{ ancestry }} </span>

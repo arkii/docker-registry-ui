@@ -35,8 +35,9 @@
     <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
     <script>
-
-
+        jQuery(document).ready(function () {
+            jQuery('.my-tooltip').tooltip();
+        });
 
     </script>
 </head>
@@ -47,17 +48,17 @@
             <a class="brand" href="/">docker-registry-ui</a>
             <ul class="nav">
                 <li class="active"><a href="/"><i class="icon-home"></i> Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="/ping">ping</a></li>
+                <li><a href="/">Images</a></li>
+                <li><a href="/ping">Ping</a></li>
             </ul>
             <ul class="nav pull-right">
                 <form class="navbar-search pull-left" action="/find/" method="post">
                     <input type="text" name="name" class="search-query" placeholder="Find anything">
                 </form>
-                {#                <li><a href="/test/conf" class="my-tooltip" rel="tooltip" data-placement="bottom"#}
-                {#                       data-original-title="configtest"><i class="icon-ok icon-white"></i></a></li>#}
-                {#                <li><a href="/test/restart" class="my-tooltip" rel="tooltip" data-placement="bottom"#}
-                {#                       data-original-title="restart"><i class="icon-off icon-white"></i></a></li>#}
+                <li><a href="#" class="my-tooltip" rel="tooltip" data-placement="bottom"
+                                       data-original-title="configtest"><i class="icon-ok"></i></a></li>
+{#                <li><a href="/ping" class="my-tooltip" rel="tooltip" data-placement="bottom"#}
+{#                       data-original-title="configtest"><i class="icon-ok"></i></a></li>#}
             </ul>
         </div>
     </div>

@@ -28,6 +28,7 @@ from datetime import datetime
 from urllib import urlencode
 
 server = '10.15.184.241'
+#server = ['docker-hub', 'docker-repo.alias.pch.net']
 target = '/v1/_ping'
 
 from httplib import HTTPConnection
@@ -63,6 +64,8 @@ class RegistryClass:
                 self.data['server_headers'] = self.headers
                 self.data['server_message'] = self.message
                 self.data['server_code'] = self.status
+        except IOError:
+            self.data = 'socket.error'
         finally:
             self.conn.close()
         return self.data
@@ -83,6 +86,8 @@ class RegistryClass:
                 self.data['server_headers'] = self.headers
                 self.data['server_message'] = self.message
                 self.data['server_code'] = self.status
+        except IOError:
+            self.data = 'socket.error'
         finally:
             self.conn.close()
         return self.data
@@ -104,6 +109,8 @@ class RegistryClass:
                 self.data['server_headers'] = self.headers
                 self.data['server_message'] = self.message
                 self.data['server_code'] = self.status
+        except IOError:
+            self.data = 'socket.error'
         finally:
             self.conn.close()
         return self.data
@@ -119,15 +126,16 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_page():
-    msg = registry.get(server, '/v1/search?q=', verbose=True)
-    msg['tableheader'] = ['Name', 'Description']
-    return render('index.html', msg=msg)
+    msg = registry.get(server, '/v1/search?q=')
+    _tableheader = ['Name', 'Description']
+    _registryhost = server
+    _status = ping_server()
+    return render('index.html', msg=msg, tableheader=_tableheader,hosts=_registryhost, status=_status)
 
 
 @app.route('/ping')
-def ping():
-    bb = registry.ping(server, verbose=True)
-    return str(bb)
+def ping_server():
+    return registry.ping(server)
 
 
 @app.route('/find/', methods=['POST'])
@@ -181,7 +189,7 @@ def show_tags(namespace=None, repository=None):
     if request.method == 'GET':  uri = '/v1/repositories/' + _query + '/tags'
     msg = registry.act(server, uri=uri, verbose=True)
     msg['tableheader'] = ['Tag', 'ID']
-    return render('info.html', msg=msg)
+    return render('tags.html', msg=msg)
 
 
 @app.route('/rm/', methods=['DELETE'])
