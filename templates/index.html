@@ -6,38 +6,15 @@
 <hr>
 <div>
     <h3>Dashboard</h3>
-<p>
-    {% if msg %}
-        Image Number:{{ msg['num_results'] }}
-    {% endif %}
-Registry Host: {{ hosts }}
-Number of Servers: {{ servers }}
-Ping Status: {{ status }}
-</p>
+
+    <p>
+        Registry Host: <span class="label label-default">{{ hosts }}</span><br/>
+
+        Ping Status: <span class="label label-success">{{ status }}</span><br/>
+
+        Image Number: <span class="label label-info">{{ imagenumber }}</span>
+    </p>
 </div>
 <hr>
-<div>
-    <h3>Images</h3>
-    <table class="table table-bordered table-striped table-hover table-condensed">
-        <tr>
-            {% for i in tableheader %}
-                <th>{{ i }}</th>
-            {% endfor %}
-        </tr>
-        {% for i in msg['results'] %}
-            <tr>
-                <td><a href="/tags/{{ i['name'] }}">{{ i['name'] }}</a></td>
-                <td>{{ i['description'] }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-
-    {#    <span class="errdiagnose_title">{{ msg['server_headers'] }} </span>#}
-    {#    <span class="errdiagnose_content">{{ msg['server_message'] }} {{ msg['server_code'] }} </span>#}
-
-</div>
-<hr>
-
-<span> {{ msg }} </span>
 
 {% include 'footer.html' %}

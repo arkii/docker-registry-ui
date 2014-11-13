@@ -1,0 +1,32 @@
+{% include 'header.html' %}
+
+<div>
+    <h3>Images</h3>
+    <table class="table table-bordered table-striped table-hover table-condensed">
+        <tr>
+            {% for i in tableheader %}
+                <th>{{ i }}</th>
+            {% endfor %}
+        </tr>
+        {% for i in msg['results'] %}
+            <tr>
+                <td>{{ i['name'] }}</td>
+                <td>{{ i['description'] }}</td>
+                <td>1</td>
+                <td>
+                    <div>
+                        <a href="/tags/{{ i['name'] }}"><button type="button" class="btn btn-link" id="my-tooltip" data-toggle="tooltip" data-placement="right" title="Info"><span class="glyphicon glyphicon-info-sign"></span></button></a>
+                        <a href="/ping"><button type="button" class="btn btn-link" id="my-tooltip" data-toggle="tooltip" data-placement="right" title="Delete This Repo"><span class="glyphicon glyphicon-trash"></span></button></a>
+                        {#                        <a href="/rm/{{ i['name'] }}">delete</a>#}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</div>
+<hr>
+
+<span> {{ msg }} </span>
+
+{% include 'footer.html' %}

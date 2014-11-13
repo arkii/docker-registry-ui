@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>test</title>
+    <title>{{ pagetitle }}</title>
     <style type="text/css">
         .errdiagnose {
             margin-bottom: 5px;
@@ -30,35 +30,56 @@
 
     </style>
     <link type="text/css" href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link type="text/css" href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
-    <link href="/static/css-sprite/sprite-av-black.css" rel="stylesheet">
-    <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
     <script>
+
         jQuery(document).ready(function () {
-            jQuery('.my-tooltip').tooltip();
+            jQuery('*#my-tooltip').tooltip();
+
+            jQuery('*#my-alert').alert('close');
         });
 
     </script>
 </head>
 <body>
-<div class="container">
-    <div class="navbar">
-        <div class="navbar-inner">
-            <a class="brand" href="/">docker-registry-ui</a>
-            <ul class="nav">
-                <li class="active"><a href="/"><i class="icon-home"></i> Home</a></li>
-                <li><a href="/">Images</a></li>
+
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">docker-registry-ui</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/">Home</a></li>
+                <li><a href="/images">Images</a></li>
                 <li><a href="/ping">Ping</a></li>
             </ul>
-            <ul class="nav pull-right">
-                <form class="navbar-search pull-left" action="/find/" method="post">
-                    <input type="text" name="name" class="search-query" placeholder="Find anything">
+            <ul class="nav navbar-nav navbar-right">
+                <form class="navbar-form navbar-left" role="search" action="/find/" method="post">
+                    <div class="form-group">
+                        <input type="text" name="name" class="form-control" placeholder="Find anything">
+                    </div>
+                    <button type="submit" class="btn btn-default">Go</button>
                 </form>
-                <li><a href="#" class="my-tooltip" rel="tooltip" data-placement="bottom"
-                                       data-original-title="configtest"><i class="icon-ok"></i></a></li>
-{#                <li><a href="/ping" class="my-tooltip" rel="tooltip" data-placement="bottom"#}
-{#                       data-original-title="configtest"><i class="icon-ok"></i></a></li>#}
+                {#                <li><a href="#">Link</a></li>#}
             </ul>
         </div>
+        <!-- /.navbar-collapse -->
     </div>
+    <!-- /.container-fluid -->
+</nav>
+
+
+<div class="container">
+
