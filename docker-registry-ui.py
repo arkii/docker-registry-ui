@@ -252,4 +252,4 @@ def output_json(namespace=None, repository=None):
 
 if __name__ == '__main__':
     Flask.debug = True
-    app.run()
+    app.run(host='0.0.0.0')
