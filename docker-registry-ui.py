@@ -211,9 +211,9 @@ def hello_world():
     if request.method == 'PUT':
         return 'YOU PUT ME !'
     if request.method == 'DELETE':
-        return 'YOU DELETE ME !'
+        return 'YOU DELETE ME   !'
     else:
-        return 'YOU DID NOTHING !'
+        return 'YOU DID NOTHING    !'
 
 
 @app.route('/test')
