@@ -22,13 +22,12 @@ curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
 
 '''
 
-
 import os, re, tarfile
 from datetime import datetime
 from urllib import urlencode
 
 server = '10.15.184.241'
-#server = ['docker-hub', 'docker-repo.alias.pch.net']
+# server = ['docker-hub', 'docker-repo.alias.pch.net']
 target = '/v1/_ping'
 
 from httplib import HTTPConnection
@@ -37,6 +36,12 @@ from flask import Flask
 from flask import request
 from flask import json
 from flask import render_template as render
+from flask import make_response
+
+def add_http_header(object=None, key=None, value=None):
+    _response = make_response(object)
+    _response.headers[key] = value
+    return _response
 
 
 class RegistryClass:
@@ -57,7 +62,7 @@ class RegistryClass:
             self.response = self.conn.getresponse()
             self.data = self.response.read()
             if verbose is True:
-                self.data = {'result' : self.data}
+                self.data = {'result': self.data}
                 self.status = self.response.status
                 self.message = self.response.reason
                 self.headers = dict(self.response.getheaders())
@@ -77,8 +82,8 @@ class RegistryClass:
             self.action = 'GET'
             self.conn.request(method=self.action, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
-            self.content = self.response.read() #here is str type
-            self.data = self.jsonde.decode(self.content) #convert str to dict
+            self.content = self.response.read()  # here is str type
+            self.data = self.jsonde.decode(self.content)  # convert str to dict
             if verbose is True:
                 self.status = self.response.status
                 self.message = self.response.reason
@@ -98,11 +103,10 @@ class RegistryClass:
             self.method = action
             self.conn.request(method=self.method, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
-            self.content = self.response.read() #here is str type
-            self.data = self.jsonde.decode(self.content) #convert str to dict
-            #self.data = self.content
+            self.content = self.response.read()  # here is str type
+            self.data = self.jsonde.decode(self.content)  # convert str to dict
             if verbose is True:
-                self.data = {'result' : self.data}
+                self.data = {'result': self.data}
                 self.status = self.response.status
                 self.message = self.response.reason
                 self.headers = dict(self.response.getheaders())
@@ -121,16 +125,25 @@ class RegistryClass:
 
 registry = RegistryClass()
 
-
 app = Flask(__name__)
+
 
 @app.route('/')
 def main_page():
-    msg = registry.get(server, '/v1/search?q=')
-    _tableheader = ['Name', 'Description']
     _registryhost = server
     _status = ping_server()
-    return render('index.html', msg=msg, tableheader=_tableheader,hosts=_registryhost, status=_status)
+    _t = registry.get(server, '/v1/search?q=')
+    _imagenumber = ''
+    if isinstance(_t, dict): _imagenumber = _t['num_results']
+
+    return render('index.html', pagetitle='index', imagenumber=_imagenumber, hosts=_registryhost, status=_status)
+
+
+@app.route('/images')
+def images_page():
+    msg = registry.get(server, '/v1/search?q=')
+    _tableheader = ['Name', 'Description', 'Tags', 'Actions']
+    return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
 
 
 @app.route('/ping')
@@ -146,8 +159,8 @@ def find_image(text=None):
     if text:
         uri = '/v1/search?q=' + str(text)
     msg = registry.get(server, uri=uri, verbose=True)
-    msg['tableheader'] = ['Name', 'Description']
-    return render('index.html', msg=msg)
+    _tableheader = ['Name', 'Description', 'Tags', 'Actions']
+    return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
 
 
 @app.route('/info/<id>')
@@ -159,49 +172,33 @@ def show_info(id=None):
     _ancestry = {}
     _ancestry['tableheader'] = 'Ancestry'
     _ancestry['data'] = registry.act(server, uri=_uri)
-    return render('info.html', msg=_msg, ancestry=_ancestry)
-
-
-
-# @app.route('/info/', methods=['POST'])
-# @app.route('/info/<namespace>')
-# @app.route('/info/<namespace>/<repository>')
-# @app.route('/info/<namespace>/<repository>/<tag>')
-# def show_info(namespace=None, repository=None, tag=None):
-#     if namespace is not None: _query = namespace
-#     if repository is not None: _query = namespace + '/' + repository
-#     if tag is not None: _query = namespace + '/' + repository + '/' + tag
-#     if request.method == 'POST': uri = '/v1/images/' + str(request.values['name']) + '/json'
-#     if request.method == 'GET':  uri = '/v1/images/' + _query + '/json'
-#     msg = registry.act(server, uri=uri, verbose=True)
-#     ancestry = registry.act(server, uri=namespace)
-#     msg['tableheader'] = ['Tag', 'ID']
-#     return render('info.html', msg=msg)
+    return render('info.html', pagetitle='images', msg=_msg, ancestry=_ancestry)
 
 
 @app.route('/tags/', methods=['POST'])
-@app.route('/tags/<namespace>')
 @app.route('/tags/<namespace>/<repository>')
 def show_tags(namespace=None, repository=None):
-    if namespace is not None: _query = namespace
     if repository is not None: _query = namespace + '/' + repository
+    uri = '/v1/repositories/' + _query + '/tags'
     if request.method == 'POST': uri = '/v1/repositories/' + str(request.values['name']) + '/tags'
-    if request.method == 'GET':  uri = '/v1/repositories/' + _query + '/tags'
     msg = registry.act(server, uri=uri, verbose=True)
     msg['tableheader'] = ['Tag', 'ID']
-    return render('tags.html', msg=msg)
+    _tree_json = '/json/' + _query
+    return render('tags.html', pagetitle='images', tree_json=_tree_json, msg=msg)
 
 
-@app.route('/rm/', methods=['DELETE'])
-@app.route('/rm/<name>')
-def delete(name=None):
-    if request.method == 'DELETE':
-        uri = '/v1/repositories/' + str(request.values['name'])
-        msg = registry.act(server, action='DELETE', uri=uri, verbose=True)
-    if name:
-        uri = '/v1/repositories/' + str(name)
-        msg = registry.act(server, action='DELETE', uri=uri)
-    # return render('index.html', msg=msg)
+@app.route('/rm/', methods=['POST'])
+@app.route('/rm/<namespace>/<repository>')
+@app.route('/rm/<namespace>/<repository>/<tag>')
+def delete(namespace=None, repository=None, tag=None):
+    if namespace is not None: _query = namespace + '/'
+    if repository is not None: _query = namespace + '/' + repository + '/'
+    if tag is not None: _query = namespace + '/' + repository + '/tags/' + tag
+    uri = '/v1/repositories/' + _query
+    if request.method == 'POST': uri = '/v1/repositories/' + str(request.values['name'])
+    msg = registry.act(server, action='DELETE', uri=uri)
+    # msg['tableheader'] = ['Tag', 'ID']
+    # return render('tags.html', pagetitle='images', msg=msg)
     return str(msg)
 
 
@@ -218,6 +215,32 @@ def hello_world():
     else:
         return 'YOU DID NOTHING !'
 
+
+@app.route('/test')
+def test():
+    return render('test.html')
+
+
+@app.route('/tree')
+def tree():
+    _url = '/json'
+    return render('tree.html', tree_json=_url)
+
+@app.route('/json/<namespace>/<repository>')
+def output_json(namespace=None, repository=None):
+    if repository is not None: _query = namespace + '/' + repository
+    _uri = '/v1/repositories/' + _query + '/tags'
+    _ancestry = {}
+    _ancestry['tableheader'] = 'Ancestry'
+    _ancestry['data'] = registry.act(server, uri=_uri)
+    _tree_json = _ancestry['data']
+    _d = {'name':_query}
+    _c = []
+    for k, v in _tree_json.iteritems():
+        _c.append({'name':k, 'children':[{'name':v}]})
+    _d['children'] = _c
+    _data = json.JSONEncoder().encode(_d)
+    return add_http_header(_data,'Content-Type', 'application/json')
 
 
 
