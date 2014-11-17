@@ -119,6 +119,28 @@ class RegistryClass:
             self.conn.close()
         return self.data
 
+    def delete(self, IP=None, action='DELETE', uri=None, verbose=False):
+        try:
+            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.method = action
+            self.conn.request(method=self.method, url=uri, headers=self.http_header)
+            self.response = self.conn.getresponse()
+            self.content = self.response.read()  # here is str type
+            self.data = self.content
+            if verbose is True:
+                self.data = {'result': self.data}
+                self.status = self.response.status
+                self.message = self.response.reason
+                self.headers = dict(self.response.getheaders())
+                self.data['server_headers'] = self.headers
+                self.data['server_message'] = self.message
+                self.data['server_code'] = self.status
+        except IOError:
+            self.data = 'socket.error'
+        finally:
+            self.conn.close()
+        return self.data
+
     def close(self):
         self.conn.close()
 
@@ -191,12 +213,14 @@ def show_tags(namespace=None, repository=None):
 @app.route('/rm/<namespace>/<repository>')
 @app.route('/rm/<namespace>/<repository>/<tag>')
 def delete(namespace=None, repository=None, tag=None):
-    if namespace is not None: _query = namespace + '/'
-    if repository is not None: _query = namespace + '/' + repository + '/'
-    if tag is not None: _query = namespace + '/' + repository + '/tags/' + tag
-    uri = '/v1/repositories/' + _query
-    if request.method == 'POST': uri = '/v1/repositories/' + str(request.values['name'])
-    msg = registry.act(server, action='DELETE', uri=uri)
+    if request.method == 'POST':
+        uri = '/v1/repositories/' + str(request.values['name']) + '/'
+    else:
+        if namespace is not None: _query = namespace + '/'
+        if repository is not None: _query = namespace + '/' + repository + '/'
+        if tag is not None: _query = namespace + '/' + repository + '/tags/' + tag
+        uri = '/v1/repositories/' + _query
+    msg = registry.delete(server, action='DELETE', uri=uri)
     # msg['tableheader'] = ['Tag', 'ID']
     # return render('tags.html', pagetitle='images', msg=msg)
     return str(msg)
@@ -251,5 +275,6 @@ def output_json(namespace=None, repository=None):
 
 
 if __name__ == '__main__':
-    Flask.debug = True
-    app.run(host='0.0.0.0')
+    # Flask.debug = True
+    # app.run(host='0.0.0.0')
+    app.run(debug=1)
