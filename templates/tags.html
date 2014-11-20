@@ -20,6 +20,59 @@
     {#<span> {{ msg }} </span>#}
 
 
+    <div>
+        <h3>Tags</h3>
+        <table class="table table-bordered table-striped table-hover table-condensed">
+            <tr>
+                {% for i in tableheader %}
+                    <th>{{ i }}</th>
+                {% endfor %}
+            </tr>
+            {% for i in msg['results'] %}
+                <tr>
+                    <td>{{ i['name'] }}</td>
+                    <td>{{ i['description'] }}</td>
+                    <td>
+                        <div>
+                            <a href="/tags/{{ i['name'] }}">
+                                <button type="button" class="btn btn-link" id="my-tooltip" data-toggle="tooltip"
+                                        data-placement="right" title="Info"><span
+                                        class="glyphicon glyphicon-info-sign"></span></button>
+                            </a>
+                            <button type="button" value="{{ i['name'] }}" class="rm-pre btn btn-link" id="my-tooltip"
+                                    data-target="#myModal" data-toggle="modal" data-placement="right"
+                                    title="Delete This Repo"><span class="glyphicon glyphicon-trash"></span></button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    </div>
+    <hr>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content alert alert-danger">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                </button>
+
+                <h4>警告</h4>
+
+                <p class="reponame">确定删除</p>
+
+                <p>
+                    <a class="rm-href">
+                        <button type="button" class="btn btn-danger">删！</button>
+                    </a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">不!</button>
+
+                </p>
+            </div>
+        </div>
+    </div>
+
 </div>
 <div>
     <style>
@@ -98,6 +151,7 @@
         d3.select(self.frameElement).style("height", height + "px");
 
     </script>
+    <h3>Tags</h3>
 </div>
 
 

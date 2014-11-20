@@ -164,7 +164,7 @@ def main_page():
 @app.route('/images')
 def images_page():
     msg = registry.get(server, '/v1/search?q=')
-    _tableheader = ['Name', 'Description', 'Tags', 'Actions']
+    _tableheader = ['Name', 'Description', 'Actions']
     return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
 
 
@@ -181,7 +181,7 @@ def find_image(text=None):
     if text:
         uri = '/v1/search?q=' + str(text)
     msg = registry.get(server, uri=uri, verbose=True)
-    _tableheader = ['Name', 'Description', 'Tags', 'Actions']
+    _tableheader = ['Name', 'Description', 'Actions']
     return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
 
 

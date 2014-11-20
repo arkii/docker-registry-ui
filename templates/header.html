@@ -36,7 +36,18 @@
 
         jQuery(document).ready(function () {
             jQuery('*#my-tooltip').tooltip();
+        });
+
+    </script>
+    <script>
+
+        jQuery(document).ready(function () {
+            jQuery(".rm-pre").click(function () {
+                var RepoName = jQuery(this).val();
+                jQuery(".reponame").append(RepoName + '?');
+                jQuery(".rm-href").attr("href", "/rm/" + RepoName)
             });
+        });
 
     </script>
 </head>
@@ -53,15 +64,15 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">docker-registry-ui</a>
+            <a class="navbar-brand" href="/"><img alt="Brand" height="20" src="/static/img/docker-logo-loggedin.png"></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/">Home</a></li>
-                <li><a href="/images">Images</a></li>
-                <li><a href="/ping">Ping</a></li>
+                <li class="active"><a href="/"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                <li><a href="/images"> <span class="glyphicon glyphicon-list"></span> Images</a></li>
+                <li><a href="/ping"><span class="glyphicon glyphicon-stats"></span> Ping</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <form class="navbar-form navbar-left" role="search" action="/find/" method="post">
