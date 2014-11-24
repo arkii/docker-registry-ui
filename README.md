@@ -5,12 +5,13 @@ v0.01
 
 ##Installation
 
-*git clone https://github.com/ARKII/docker-registry-ui.git
-*cd docker-registry-ui
-*sudo pip install -r requirements.txt
-*vi configuration.py
-*sudo python ./docker-registry-ui.py
-
+```Bash
+git clone https://github.com/ARKII/docker-registry-ui.git
+cd docker-registry-ui
+sudo pip install -r requirements.txt
+vi configuration.py
+sudo python ./docker-registry-ui.py
+```
 
 Visit http://ip:5000/
 
