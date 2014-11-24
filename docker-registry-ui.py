@@ -3,31 +3,11 @@ __author__ = 'arkii'
 __email__ = 'sun.qingyun@zol.com.cn'
 __create__ = '10/30/14 19:48'
 
-'''
-https://docs.docker.com/reference/api/registry_api/
-
-
-http://10.15.184.241:5000/v1/_ping
-true
-http://10.15.184.241:5000/v1/search?q=arkii
-{"num_results": 1, "query": "arkii", "results": [{"description": null, "name": "arkii/centos65-httpd-2.0.65"}]}
-https://docs.docker.com/reference/api/docker-io_api/
-https://docs.docker.com/reference/api/registry_api/
-
-
-#删除tag
-curl -X DELETE 10.15.184.241/v1/repositories/library/centos/tags/centos5
-#删除repo
-curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
-
-'''
 
 import os, re, tarfile
 from urllib import urlencode
 
-server = '10.15.184.241'
-# server = ['docker-hub', 'docker-repo.alias.pch.net']
-target = '/v1/_ping'
+import configuration
 
 from httplib import HTTPConnection
 
@@ -44,7 +24,7 @@ def add_http_header(object=None, key=None, value=None):
 
 
 class RegistryClass:
-    def __init__(self):
+    def __init__(self, server, port):
         self.http_header = {
             "Cache-Control": "no-cache",
             "User-Agent": "DockerRegistryUI",
@@ -53,10 +33,12 @@ class RegistryClass:
         }
         self.jsonde = json.JSONDecoder()
         self.jsonen = json.JSONEncoder()
+        self.server = server
+        self.port = port
 
-    def ping(self, IP=None, verbose=False):
+    def ping(self, verbose=False):
         try:
-            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.conn = HTTPConnection(self.server, port=self.port, timeout=3)
             self.conn.request(method='GET', url='/v1/_ping', headers=self.http_header)
             self.response = self.conn.getresponse()
             self.data = self.response.read()
@@ -75,9 +57,9 @@ class RegistryClass:
         return self.data
 
 
-    def get(self, IP=None, uri=None, verbose=False):
+    def get(self, uri=None, verbose=False):
         try:
-            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.conn = HTTPConnection(self.server, port=self.port, timeout=3)
             self.action = 'GET'
             self.conn.request(method=self.action, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
@@ -96,9 +78,9 @@ class RegistryClass:
             self.conn.close()
         return self.data
 
-    def act(self, IP=None, action='GET', uri=None, verbose=False):
+    def act(self, action='GET', uri=None, verbose=False):
         try:
-            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.conn = HTTPConnection(self.server, port=self.port, timeout=3)
             self.method = action
             self.conn.request(method=self.method, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
@@ -118,9 +100,9 @@ class RegistryClass:
             self.conn.close()
         return self.data
 
-    def delete(self, IP=None, action='DELETE', uri=None, verbose=False):
+    def delete(self, action='DELETE', uri=None, verbose=False):
         try:
-            self.conn = HTTPConnection(IP, port=80, timeout=3)
+            self.conn = HTTPConnection(self.server, port=self.port, timeout=3)
             self.method = action
             self.conn.request(method=self.method, url=uri, headers=self.http_header)
             self.response = self.conn.getresponse()
@@ -144,16 +126,16 @@ class RegistryClass:
         self.conn.close()
 
 
-registry = RegistryClass()
+registry = RegistryClass(server=configuration.server, port=configuration.port)
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def main_page():
-    _registryhost = server
+    _registryhost = configuration.server
     _status = ping_server()
-    _t = registry.get(server, '/v1/search?q=')
+    _t = registry.get('/v1/search?q=')
     _imagenumber = ''
     if isinstance(_t, dict): _imagenumber = _t['num_results']
 
@@ -162,14 +144,14 @@ def main_page():
 
 @app.route('/images')
 def images_page():
-    msg = registry.get(server, '/v1/search?q=')
+    msg = registry.get('/v1/search?q=')
     _tableheader = ['Name', 'Description', 'Actions']
     return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
 
 
 @app.route('/ping')
 def ping_server():
-    return registry.ping(server)
+    return registry.ping()
 
 
 @app.route('/find/', methods=['POST'])
@@ -179,7 +161,7 @@ def find_image(text=None):
         uri = '/v1/search?q=' + request.values['name']
     if text:
         uri = '/v1/search?q=' + str(text)
-    msg = registry.get(server, uri=uri, verbose=True)
+    msg = registry.get(uri=uri, verbose=True)
     _tableheader = ['Name', 'Description', 'Actions']
     return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
 
@@ -187,12 +169,12 @@ def find_image(text=None):
 @app.route('/info/<id>')
 def show_info(id=None):
     _uri = '/v1/images/' + id + '/json'
-    _msg = registry.act(server, uri=_uri, verbose=True)
+    _msg = registry.act(uri=_uri, verbose=True)
     _msg['tableheader'] = ['Tag', 'ID']
     _uri = '/v1/images/' + id + '/ancestry'
     _ancestry = {}
     _ancestry['tableheader'] = 'Ancestry'
-    _ancestry['data'] = registry.act(server, uri=_uri)
+    _ancestry['data'] = registry.act(uri=_uri)
     return render('info.html', pagetitle='images', msg=_msg, ancestry=_ancestry)
 
 
@@ -202,7 +184,7 @@ def show_tags(namespace=None, repository=None):
     if repository is not None: _query = namespace + '/' + repository
     if request.method == 'POST': _query = str(request.values['name'])
     uri = '/v1/repositories/' + _query + '/tags'
-    msg = registry.act(server, uri=uri, verbose=True)
+    msg = registry.act(uri=uri, verbose=True)
     _tableheader = ['Name', 'ID', 'Actions']
     _tree_json = '/json/' + _query
     return render('tags.html', pagetitle='tags', tree_json=_tree_json, msg=msg, tableheader=_tableheader, reponame=_query)
@@ -219,7 +201,7 @@ def delete(namespace=None, repository=None, tag=None):
         if repository is not None: _query = namespace + '/' + repository + '/'
         if tag is not None: _query = namespace + '/' + repository + '/tags/' + tag
         uri = '/v1/repositories/' + _query
-    msg = registry.delete(server, action='DELETE', uri=uri)
+    msg = registry.delete(action='DELETE', uri=uri)
     # msg['tableheader'] = ['Tag', 'ID']
     # return render('tags.html', pagetitle='images', msg=msg)
     return str(msg)
@@ -255,7 +237,7 @@ def output_json(namespace=None, repository=None):
     _uri = '/v1/repositories/' + _query + '/tags'
     _ancestry = {}
     _ancestry['tableheader'] = 'Ancestry'
-    _ancestry['data'] = registry.act(server, uri=_uri)
+    _ancestry['data'] = registry.act(uri=_uri)
     _tree_json = _ancestry['data']
     _d = {'name':_query}
     _c = []
@@ -275,5 +257,5 @@ def output_json(namespace=None, repository=None):
 
 if __name__ == '__main__':
     # Flask.debug = True
-    # app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')
     app.run(debug=1)
