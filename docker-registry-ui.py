@@ -23,7 +23,6 @@ curl -X DELETE 10.15.184.241/v1/repositories/library/centos7/
 '''
 
 import os, re, tarfile
-from datetime import datetime
 from urllib import urlencode
 
 server = '10.15.184.241'
@@ -201,12 +200,12 @@ def show_info(id=None):
 @app.route('/tags/<namespace>/<repository>')
 def show_tags(namespace=None, repository=None):
     if repository is not None: _query = namespace + '/' + repository
+    if request.method == 'POST': _query = str(request.values['name'])
     uri = '/v1/repositories/' + _query + '/tags'
-    if request.method == 'POST': uri = '/v1/repositories/' + str(request.values['name']) + '/tags'
     msg = registry.act(server, uri=uri, verbose=True)
-    msg['tableheader'] = ['Tag', 'ID']
+    _tableheader = ['Name', 'ID', 'Actions']
     _tree_json = '/json/' + _query
-    return render('tags.html', pagetitle='images', tree_json=_tree_json, msg=msg)
+    return render('tags.html', pagetitle='tags', tree_json=_tree_json, msg=msg, tableheader=_tableheader, reponame=_query)
 
 
 @app.route('/rm/', methods=['POST'])

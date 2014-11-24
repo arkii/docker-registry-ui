@@ -1,24 +1,8 @@
 {% include 'header.html' %}
 <div class="container">
 
-    <div>
-        <table class="table table-bordered table-striped table-hover table-condensed">
-            <tr>
-                {% for i in msg['tableheader'] %}
-                    <th>{{ i }}</th>
-                {% endfor %}
-            </tr>
-            {% for k, v in msg['result'].iteritems() %}
-                <tr>
-                    <td>{{ k }}</td>
-                    <td><a href="/info/{{ v }}">{{ v }}</a></td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
     {#<span> {{ ancestry }} </span>#}
-    {#<span> {{ msg }} </span>#}
-
+{#    <span> {{ msg }} </span>#}
 
     <div>
         <h3>Tags</h3>
@@ -28,24 +12,25 @@
                     <th>{{ i }}</th>
                 {% endfor %}
             </tr>
-            {% for i in msg['results'] %}
+            {% for k, v in msg['result'].iteritems() %}
                 <tr>
-                    <td>{{ i['name'] }}</td>
-                    <td>{{ i['description'] }}</td>
+                    <td>{{ k }}</td>
+                    <td><a href="/info/{{ v }}">{{ v }}</a></td>
                     <td>
                         <div>
-                            <a href="/tags/{{ i['name'] }}">
+                            <a href="/info/{{ v}}">
                                 <button type="button" class="btn btn-link" id="my-tooltip" data-toggle="tooltip"
                                         data-placement="right" title="Info"><span
                                         class="glyphicon glyphicon-info-sign"></span></button>
                             </a>
-                            <button type="button" value="{{ i['name'] }}" class="rm-pre btn btn-link" id="my-tooltip"
+                            <button type="button" value="{{ reponame }}/{{ k }}" class="rm-pre btn btn-link" id="my-tooltip"
                                     data-target="#myModal" data-toggle="modal" data-placement="right"
                                     title="Delete This Repo"><span class="glyphicon glyphicon-trash"></span></button>
                         </div>
                     </td>
                 </tr>
             {% endfor %}
+
         </table>
 
     </div>
