@@ -44,7 +44,7 @@
         jQuery(document).ready(function () {
             jQuery(".rm-pre").click(function () {
                 var RepoName = jQuery(this).val();
-                jQuery(".reponame").html('确定删除  ' + RepoName + '  ?');
+                jQuery(".reponame").html('This action CANNOT be undone. This will permanently delete  <b>' + RepoName + '</b> ?');
                 jQuery(".rm-href").attr("href", "/rm/" + RepoName)
             });
         });

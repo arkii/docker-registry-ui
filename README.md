@@ -5,6 +5,7 @@ v0.01
 
 ##Installation
 
+###The normal way
 ```Bash
 git clone https://github.com/ARKII/docker-registry-ui.git
 cd docker-registry-ui
@@ -12,6 +13,15 @@ sudo pip install -r requirements.txt
 vi configuration.py
 sudo python ./docker-registry-ui.py
 ```
+
+###The docker way
+```Bash
+git clone https://github.com/ARKII/docker-registry-ui.git
+cd docker-registry-ui
+vi configuration.py
+sh docker-registry-ui.sh
+```
+
 
 Visit http://ip:5000/
 
