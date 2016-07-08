@@ -257,5 +257,5 @@ def output_json(namespace=None, repository=None):
 
 if __name__ == '__main__':
     # Flask.debug = True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=10060)
     app.run(debug=1)
