@@ -17,7 +17,7 @@ GLOBAL={
 #生产环境配置段
 PRODUCT={
 
-    "ProcessName": "SIC.RegistryUI",
+    "ProcessName": "SIC.RegUI",
     #Custom process, you can see it with "ps aux|grep ProcessName".
 
     "ProductType": "tornado",
