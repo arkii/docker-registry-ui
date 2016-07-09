@@ -31,23 +31,7 @@
     </div>
     <hr>
 
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content alert alert-danger">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                        class="sr-only">Close</span></button>
-                </button>
-                <h4>Are you <b>ABSOLUTELY</b> sure?</h4>
-                <p class="reponame">确定删除</p>
-                <p>
-                    <a class="rm-href">
-                        <button type="button" class="btn btn-danger">YES！</button>
-                    </a>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">NO!</button>
-                </p>
-            </div>
-        </div>
-    </div>
+    {% include "image_tag_delete.html" %}
 </div>
 
 {% include 'footer.html' %}
