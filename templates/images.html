@@ -6,11 +6,11 @@
         <h3>Docker Registry Images Dashboard</h3>
         <table class="table table-bordered table-striped table-hover table-condensed">
             <tr>
-                {% for i in tableheader %}
-                    <th>{{ i }}</th>
-                {% endfor %}
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
             </tr>
-            {% for i in msg['results'] %}
+            {% for i in data['results'] %}
                 <tr>
                     <td>{{ i['name'] }}</td>
                     <td>{{ i['description'] }}</td>
@@ -18,18 +18,19 @@
                         <div>
                             <a href="/tags/{{ i['name'] }}">
                                 <button type="button" class="btn btn-link" id="my-tooltip" data-toggle="tooltip"
-                                        data-placement="right" title="Info"><span
+                                        data-placement="right" title="Tag"><span
                                         class="glyphicon glyphicon-info-sign"></span></button>
                             </a>
                             <button type="button" value="{{ i['name'] }}" class="rm-pre btn btn-link" id="my-tooltip"
                                     data-target="#myModal" data-toggle="modal" data-placement="right"
-                                    title="Delete This Repo"><span class="glyphicon glyphicon-trash"></span></button>
+                                    title="Delete This Repo">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                            </button>
                         </div>
                     </td>
                 </tr>
             {% endfor %}
         </table>
-
     </div>
     <hr>
 
@@ -39,23 +40,24 @@
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
                         class="sr-only">Close</span></button>
                 </button>
-
                 <h4>Are you <b>ABSOLUTELY</b> sure?</h4>
-
                 <p class="reponame">确定删除</p>
-
                 <p>
                     <a class="rm-href">
                         <button type="button" class="btn btn-danger">YES！</button>
                     </a>
                     <button type="button" class="btn btn-default" data-dismiss="modal">NO!</button>
-
                 </p>
             </div>
         </div>
     </div>
-
-{#    <span> {{ msg }} </span>#}
-
 </div>
+
+<script>
+    var NavId=null;
+    var As=document.getElementById('nav').getElementsByTagName('li');
+    NavId = As[1];
+    console.log(NavId);
+    NavId.className='active';
+</script>
 {% include 'footer.html' %}

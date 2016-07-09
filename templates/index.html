@@ -7,12 +7,23 @@
 <hr>
 <div>
     <div>
-        <p>Registry Host: <span class="label label-default">{{ hosts }}</span></p>
-        <p>Image Number: <span class="label label-info">{{ imagenumber }}</span></p>
-        <p>Ping StatusCode:  <span class="label label-success">{{ status }}</span></p>
+        <p>Registry Host:
+            <span class="label label-default">
+            {{ hosts }}
+            </span>
+        </p>
+        <p>Image Number: <span class="label label-info">{{ data.num_results }}</span></p>
+        <p>Registry Version:  <span class="label label-warning">{{ version }}</span></p>
     </div>
 </div>
 <hr>
 </div>
 
+<script>
+    var NavId=null;
+    var As=document.getElementById('nav').getElementsByTagName('li');
+    NavId = As[0];
+    console.log(NavId);
+    NavId.className='active';
+</script>
 {% include 'footer.html' %}
