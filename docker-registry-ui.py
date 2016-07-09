@@ -128,18 +128,29 @@ class RegistryClass:
 
 registry = RegistryClass(server=configuration.server, port=configuration.port)
 
+import requests
+from SpliceURL import Splice
+from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
-
+uri = 'http://127.0.0.1:5000'
 
 @app.route('/')
 def main_page():
+    """
     _registryhost = configuration.server
     _status = ping_server()
     _t = registry.get('/v1/search?q=')
     _imagenumber = ''
     if isinstance(_t, dict): _imagenumber = _t['num_results']
 
-    return render('index.html', pagetitle='index', imagenumber=_imagenumber, hosts=_registryhost, status=_status)
+    return render('index.html', pagetitle='index', imagenumber=_imagenumber, hosts=_registryhost, status=_status) 
+    """
+    path = '/v1/search'
+    res  = requests.get(uri+path, timeout=1)
+    data = res.json()
+    status = res.status_code
+    img_num= data.get("num_results")
+    return render_template('index.html', pagetitle='index', imagenumber=img_num, hosts=uri, status=status)
 
 
 @app.route('/images')
@@ -151,7 +162,9 @@ def images_page():
 
 @app.route('/ping')
 def ping_server():
-    return registry.ping()
+    res  = requests.get(uri+'/_ping', timeout=1)
+    data = res.json()
+    return jsonify({uri: data})
 
 
 @app.route('/find/', methods=['POST'])
@@ -207,30 +220,6 @@ def delete(namespace=None, repository=None, tag=None):
     return str(msg)
 
 
-@app.route('/plain', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def hello_world():
-    if request.method == 'GET':
-        return 'YOU GET ME !'
-    if request.method == 'POST':
-        return 'YOU POST ME !'
-    if request.method == 'PUT':
-        return 'YOU PUT ME !'
-    if request.method == 'DELETE':
-        return 'YOU DELETE ME   !'
-    else:
-        return 'YOU DID NOTHING    !'
-
-
-@app.route('/test')
-def test():
-    return render('test.html')
-
-
-@app.route('/tree')
-def tree():
-    _url = '/json'
-    return render('tree.html', tree_json=_url)
-
 @app.route('/json/<namespace>/<repository>')
 def output_json(namespace=None, repository=None):
     if repository is not None: _query = namespace + '/' + repository
@@ -247,15 +236,6 @@ def output_json(namespace=None, repository=None):
     _data = json.JSONEncoder().encode(_d)
     return add_http_header(_data,'Content-Type', 'application/json')
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     # Flask.debug = True
-    app.run(host='0.0.0.0', port=10060)
-    app.run(debug=1)
+    app.run(host='0.0.0.0', port=10060, debug=True)

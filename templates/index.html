@@ -2,19 +2,15 @@
 <div class="container">
 
 <div>
-    <h1>Docker Registry Web Console</h1>
+    <h1>Docker Registry Dashboard</h1>
 </div>
 <hr>
 <div>
-    <h3>Dashboard</h3>
-
-    <p>
-        Registry Host: <span class="label label-default">{{ hosts }}</span><br/>
-
-        Ping Status: <span class="label label-success">{{ status }}</span><br/>
-
-        Image Number: <span class="label label-info">{{ imagenumber }}</span>
-    </p>
+    <div>
+        <p>Registry Host: <span class="label label-default">{{ hosts }}</span></p>
+        <p>Image Number: <span class="label label-info">{{ imagenumber }}</span></p>
+        <p>Ping StatusCode:  <span class="label label-success">{{ status }}</span></p>
+    </div>
 </div>
 <hr>
 </div>
