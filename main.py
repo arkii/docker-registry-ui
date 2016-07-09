@@ -4,16 +4,9 @@ __email__ = 'sun.qingyun@zol.com.cn'
 __create__ = '10/30/14 19:48'
 
 
-import os, re, tarfile
+import os, re, json
 from urllib import urlencode
-
-import configuration
-
 from httplib import HTTPConnection
-
-from flask import Flask
-from flask import request
-from flask import json
 from flask import render_template as render
 from flask import make_response
 
@@ -21,7 +14,6 @@ def add_http_header(object=None, key=None, value=None):
     _response = make_response(object)
     _response.headers[key] = value
     return _response
-
 
 class RegistryClass:
     def __init__(self, server, port):
@@ -126,13 +118,15 @@ class RegistryClass:
         self.conn.close()
 
 
-registry = RegistryClass(server=configuration.server, port=configuration.port)
+ip  = '101.200.125.9'
+port= 5000
+registry = RegistryClass(server=ip, port=port)
 
 import requests
 from flask import Flask, render_template, request, jsonify, url_for, redirect
 
 app = Flask(__name__)
-uri = 'http://101.200.125.9:5000'
+uri = "http://" + ip + ':' + str(port)
 timeout = 3
 RegistryHost = []
 RegistryHost_default = uri
@@ -244,4 +238,7 @@ def output_json(namespace=None, repository=None):
     return add_http_header(_data,'Content-Type', 'application/json')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10060, debug=True)
+    from config import GLOBAL
+    Host = GLOBAL.get('Host')
+    Port = GLOBAL.get('Port')
+    app.run(host=Host, port=int(Port), debug=True)
