@@ -118,8 +118,8 @@ class RegistryClass:
         self.conn.close()
 
 
-ip  = '101.200.125.9'
-port= 5000
+ip  = 'registry.saintic.com'
+port= 443
 registry = RegistryClass(server=ip, port=port)
 
 import requests
@@ -127,6 +127,7 @@ from flask import Flask, render_template, request, jsonify, url_for, redirect
 
 app = Flask(__name__)
 uri = "http://" + ip + ':' + str(port)
+uri = "https://registry.saintic.com"
 timeout = 3
 RegistryHost = []
 RegistryHost_default = uri

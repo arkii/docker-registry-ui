@@ -22,7 +22,6 @@ function _status()
         echo -e "  process start time:" "\033[39;32m$(ps -eO lstart | grep $procname | grep -v grep | awk '{print $6"-"$3"-"$4,$5}')\033[0m"
         echo -e "  process running time:" "\033[39;32m$(ps -eO etime| grep $(cat $pidfile) | grep -v grep | awk '{print $2}')\033[0m"
     fi
-
 }
 
 case $1 in

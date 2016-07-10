@@ -4,7 +4,6 @@ import os
 import config
 import logging.handlers
 
-
 class Syslog:
 
     logger = None
