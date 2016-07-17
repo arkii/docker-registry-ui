@@ -2,21 +2,28 @@
 <div class="container">
 
 <div>
-    <h1>Docker Registry Web Console</h1>
+    <h1>Docker Registry Dashboard</h1>
 </div>
 <hr>
 <div>
-    <h3>Dashboard</h3>
-
-    <p>
-        Registry Host: <span class="label label-default">{{ hosts }}</span><br/>
-
-        Ping Status: <span class="label label-success">{{ status }}</span><br/>
-
-        Image Number: <span class="label label-info">{{ imagenumber }}</span>
-    </p>
+    <div>
+        <p>Registry Host:
+            <span class="label label-default">
+            {{ hosts }}
+            </span>
+        </p>
+        <p>Image Number: <span class="label label-info">{{ data.num_results }}</span></p>
+        <p>Registry Version:  <span class="label label-warning">{{ version }}</span></p>
+    </div>
 </div>
 <hr>
 </div>
 
+<script>
+    var NavId=null;
+    var As=document.getElementById('nav').getElementsByTagName('li');
+    NavId = As[0];
+    console.log(NavId);
+    NavId.className='active';
+</script>
 {% include 'footer.html' %}
