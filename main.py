@@ -4,16 +4,9 @@ __email__ = 'sun.qingyun@zol.com.cn'
 __create__ = '10/30/14 19:48'
 
 
-import os, re, tarfile
+import os, re, json
 from urllib import urlencode
-
-import configuration
-
 from httplib import HTTPConnection
-
-from flask import Flask
-from flask import request
-from flask import json
 from flask import render_template as render
 from flask import make_response
 
@@ -21,7 +14,6 @@ def add_http_header(object=None, key=None, value=None):
     _response = make_response(object)
     _response.headers[key] = value
     return _response
-
 
 class RegistryClass:
     def __init__(self, server, port):
@@ -126,57 +118,80 @@ class RegistryClass:
         self.conn.close()
 
 
-registry = RegistryClass(server=configuration.server, port=configuration.port)
+ip  = 'registry.saintic.com'
+port= 443
+registry = RegistryClass(server=ip, port=port)
+
+import requests
+from flask import Flask, render_template, request, jsonify, url_for, redirect
 
 app = Flask(__name__)
+uri = "http://" + ip + ':' + str(port)
+uri = "https://registry.saintic.com"
+timeout = 3
+RegistryHost = []
+RegistryHost_default = uri
 
 
 @app.route('/')
-def main_page():
-    _registryhost = configuration.server
-    _status = ping_server()
-    _t = registry.get('/v1/search?q=')
-    _imagenumber = ''
-    if isinstance(_t, dict): _imagenumber = _t['num_results']
-
-    return render('index.html', pagetitle='index', imagenumber=_imagenumber, hosts=_registryhost, status=_status)
+def index():
+    path = '/v1/search'
+    res  = requests.get(uri+path, timeout=timeout)
+    data = res.json()
+    return render_template('index.html', data=data, hosts=uri, version='v1')
 
 
-@app.route('/images')
-def images_page():
-    msg = registry.get('/v1/search?q=')
-    _tableheader = ['Name', 'Description', 'Actions']
-    return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
+@app.route('/registry_manager', methods=["GET", "POST", "DELETE", "PUT"])
+def registry_manager():
+    method = request.method
+    if method == "GET":
+        return jsonify(RegistryHost=RegistryHost)
+    elif method == "POST":
+        _add_registry_host = request.form.get("registry_host")
+        RegistryHost.append(_add_registry_host)
+        return redirect(url_for("registry_manager"))
+    elif method == "DELETE":
+        _del_registry_host = request.form.get("registry_host")
+        for host in RegistryHost:
+            if host.find("_del_registry_host") >= 0:
+                RegistryHost.remove(_del_registry_host)
+                return redirect(url_for("registry_manager"))
+            else:
+                return "no such registry"
+    elif method == "PUT":
+        pass
+
+
+@app.route('/images/', methods=['GET','POST'])
+@app.route('/images/<text>', methods=['GET','POST'])
+@app.route('/find/', methods=['GET','POST'])
+@app.route('/find/<text>', methods=['GET','POST'])
+def images_page(text=None):
+    path = "/v1/search"
+    if request.method == 'POST':
+        path = '/v1/search?q=' + request.form.get('search')
+    if text:
+        path = '/v1/search?q=' + str(text)
+    res  = requests.get(uri+path, timeout=timeout)
+    data = res.json()
+    return render_template('images.html', data=data)
+
+
+@app.route('/info/<image_id>')
+def show_info(image_id=None):
+    data = {}
+    json_url = uri + '/v1/images/' + image_id + '/json'
+    ance_url = uri + '/v1/images/' + image_id + '/ancestry'
+    data["json"]     = requests.get(json_url, timeout=timeout).json()
+    data["ancestry"] = requests.get(ance_url, timeout=timeout).json()
+    return render_template('info.html', data=data)
 
 
 @app.route('/ping')
 def ping_server():
-    return registry.ping()
-
-
-@app.route('/find/', methods=['POST'])
-@app.route('/find/<text>')
-def find_image(text=None):
-    if request.method == 'POST':
-        uri = '/v1/search?q=' + request.values['name']
-    if text:
-        uri = '/v1/search?q=' + str(text)
-    msg = registry.get(uri=uri, verbose=True)
-    _tableheader = ['Name', 'Description', 'Actions']
-    return render('images.html', pagetitle='images', msg=msg, tableheader=_tableheader)
-
-
-@app.route('/info/<id>')
-def show_info(id=None):
-    _uri = '/v1/images/' + id + '/json'
-    _msg = registry.act(uri=_uri, verbose=True)
-    _msg['tableheader'] = ['Tag', 'ID']
-    _uri = '/v1/images/' + id + '/ancestry'
-    _ancestry = {}
-    _ancestry['tableheader'] = 'Ancestry'
-    _ancestry['data'] = registry.act(uri=_uri)
-    return render('info.html', pagetitle='images', msg=_msg, ancestry=_ancestry)
-
+    res  = requests.get(uri+'/_ping', timeout=1)
+    data = res.json()
+    return jsonify({uri: data})
 
 @app.route('/tags/', methods=['POST'])
 @app.route('/tags/<namespace>/<repository>')
@@ -207,30 +222,6 @@ def delete(namespace=None, repository=None, tag=None):
     return str(msg)
 
 
-@app.route('/plain', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def hello_world():
-    if request.method == 'GET':
-        return 'YOU GET ME !'
-    if request.method == 'POST':
-        return 'YOU POST ME !'
-    if request.method == 'PUT':
-        return 'YOU PUT ME !'
-    if request.method == 'DELETE':
-        return 'YOU DELETE ME   !'
-    else:
-        return 'YOU DID NOTHING    !'
-
-
-@app.route('/test')
-def test():
-    return render('test.html')
-
-
-@app.route('/tree')
-def tree():
-    _url = '/json'
-    return render('tree.html', tree_json=_url)
-
 @app.route('/json/<namespace>/<repository>')
 def output_json(namespace=None, repository=None):
     if repository is not None: _query = namespace + '/' + repository
@@ -247,15 +238,8 @@ def output_json(namespace=None, repository=None):
     _data = json.JSONEncoder().encode(_d)
     return add_http_header(_data,'Content-Type', 'application/json')
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-    # Flask.debug = True
-    app.run(host='0.0.0.0')
-    app.run(debug=1)
+    from config import GLOBAL
+    Host = GLOBAL.get('Host')
+    Port = GLOBAL.get('Port')
+    app.run(host=Host, port=int(Port), debug=True)

@@ -1,35 +1,29 @@
 {% include 'header.html' %}
-<div class="container">
 
-<div>
-    <table class="table table-bordered table-striped table-hover table-condensed">
-        <tr>
-            {% for i in msg['tableheader'] %}
-                <th>{{ i }}</th>
-            {% endfor %}
-        </tr>
-        {% for k, v in msg['result'].iteritems() %}
+<div class="container">
+    <div>
+        <h3>Docker Registry Info Dashboard</h3>
+        <table class="table table-bordered table-striped table-hover table-condensed">
+            <tr>
+                <th>Tag Key</th>
+                <th>Tag Key Info</th>
+            </tr>
+            {% for k, v in data['json'].iteritems() %}
             <tr>
                 <td>{{ k }}</td>
-                {#                <td><a href="/info/{{ v }}">{{ v }}</a></td>#}
                 <td>{{ v }}</td>
             </tr>
-        {% endfor %}
-        {% if ancestry %}
+            {% endfor %}
             <tr>
-                <td>{{ ancestry['tableheader'] }}</td>
+                <td>ancestry</td>
                 <td>
-                    {% for i in ancestry['data'] %}
+                    {% for i in data['ancestry'] %}
                         <a href="/info/{{ i }}">{{ i }}</a><br/>
                     {% endfor %}
-
                 </td>
             </tr>
-        {% endif %}
-    </table>
-</div>
-{#<span> {{ ancestry }} </span>#}
-{#<span> {{ msg }} </span>#}
+        </table>
+    </div>
 </div>
 
 {% include 'footer.html' %}
